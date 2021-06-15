@@ -1,0 +1,7 @@
+# Copy this file to `backend.hcl` and update the organization and workspace name
+hostname     = "app.terraform.io"
+organization = "hashicorp"
+
+workspaces {
+    name = "Workspace"
+}
