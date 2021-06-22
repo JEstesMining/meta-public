@@ -1,4 +1,9 @@
 terraform {
+  required_version = ">=0.15"
+
+  # @see https://www.terraform.io/docs/language/expressions/type-constraints.html#experimental-optional-object-type-attributes
+  experiments = [module_variable_optional_attrs]
+
   backend "remote" {}
 
   required_providers {
@@ -32,20 +37,6 @@ resource "github_membership" "members" {
 # GitHub Repositories
 ################################################################################
 #-------------------------------------------------------------------------------
-# translations repository
-#-------------------------------------------------------------------------------
-resource "github_repository" "translations" {
-  name         = "translations"
-  description  = "Translation files for DasCrypto"
-  homepage_url = "https://dascrypto.farm"
-  visibility   = "public"
-
-  has_issues             = true
-  has_wiki               = false
-  delete_branch_on_merge = true
-  vulnerability_alerts   = true
-}
-#-------------------------------------------------------------------------------
 # dascrypto.farm repository
 #-------------------------------------------------------------------------------
 resource "github_repository" "dascrypt_farm" {
@@ -65,32 +56,17 @@ resource "github_repository" "dascrypt_farm" {
   }
 }
 #-------------------------------------------------------------------------------
-# chia-client-php repository
-# - This Repository needs issue labels
+# All other public repositories
 #-------------------------------------------------------------------------------
-resource "github_repository" "chia_client_php" {
-  name         = "chia-client-php"
-  description  = "Provides the ability to communicate with chia via RPC"
-  visibility   = "public"
+resource "github_repository" "this" {
+  count = length(var.github_repos)
 
-  topics = ["chia","chia-blockchain","php","php-library"]
+  name         = var.github_repos[count.index].name
+  homepage_url = var.github_repos[count.index].homepage_url
+  description  = var.github_repos[count.index].description
+  topics       = var.github_repos[count.index].topics
 
-  has_issues             = true
-  has_wiki               = true
-  delete_branch_on_merge = true
-  vulnerability_alerts   = true
-}
-#-------------------------------------------------------------------------------
-# meta-public
-#-------------------------------------------------------------------------------
-resource "github_repository" "meta_public" {
-  name         = "meta-public"
-  description  = "Contains code used to build out the organization"
-  visibility   = "public"
-
-  has_issues             = true
-  has_wiki               = false
-  has_projects           = false
-  delete_branch_on_merge = true
-  vulnerability_alerts   = true
+  has_wiki             = var.github_repos[count.index].has_wiki == null ? true : var.github_repos[count.index].has_wiki
+  has_issues           = true
+  vulnerability_alerts = true
 }
